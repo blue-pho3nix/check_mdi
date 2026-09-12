@@ -7,8 +7,7 @@ Based on: https://github.com/expl0itabl3/check_mdi/
 ## Usage
 ```
 git clone https://github.com/blue-pho3nix/check_mdi.git
-chmod +x check_mdi.py
-./check_mdi.py -d <domain>
+python check_mdi.py -d <domain>
 ```
 If needed..
 ```
