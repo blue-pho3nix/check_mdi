@@ -16,3 +16,7 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+If you don't get any domains on 10x retries go for 
+```
+python check_mdi.py -d <domain> -r 25
+```
