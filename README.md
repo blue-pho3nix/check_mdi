@@ -1,5 +1,5 @@
 # check_mdi
-Python script to enumerate valid Microsoft 365 domains, retrieve tenant name, and check for an MDI instance.
+Python script to enumerate valid Microsoft 365 domains, retrieve the tenant name, and check for an MDI instance.
 
 
 Based on: https://github.com/expl0itabl3/check_mdi/
@@ -16,7 +16,7 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-If you don't get any domains on 10x retries go for 
+If you don't get any domains after 10x retries, go for a higher `-r`... sometimes need `40–50` 
 ```
 python check_mdi.py -d <domain> -r 25
-```
+``
