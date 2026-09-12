@@ -104,8 +104,15 @@ def check_mdi(tenant):
     except Exception:
         print(f"\n[-] No MDI instance was found for {target}\n")
 
+banner = r"""
+┌────┐┌─┐┌─┐┌────┐┌────┐┌─┐┌─┐     ┌──┬──┐┌───┐ ┌─┐   ┌────┐┌─┐┌─┐
+│░┌──┘│▒└┘▒││░┌─┬┘│░┌──┘│▒└┘┌┘     │▒▒ ▒▒││░├┐└┐│▒│   │▒┌┐▒││▒└┘▒│
+│▒└──┐│▓┌┐▓││▓┌─┴┐│▒└──┐│▓┌┐▓┐┌───┐│▓├─┤▓││▒├┘░││▓│┌─┐│▓├┴─┘└──┐▓│
+└────┘└─┘└─┘└────┘└────┘└─┘└─┘└───┘└─┘ └─┘└────┘└─┘└─┘└─┘   └────┘
+"""
 
 if __name__ == "__main__":
+    print(banner)
     parser = argparse.ArgumentParser(
         description="Enumerate M365 domains, retrieve tenant, check for MDI instance")
     parser.add_argument("-d", "--domain", required=True,
