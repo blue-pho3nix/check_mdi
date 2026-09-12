@@ -51,7 +51,7 @@ def get_domains(args):
     domain = args.domain
     ns = "{http://schemas.microsoft.com/exchange/2010/Autodiscover}Domain"
 
-    max_attempts = 10
+    max_attempts = args.retries
     best_domains = []
 
     for attempt in range(1, max_attempts + 1):
@@ -110,4 +110,6 @@ if __name__ == "__main__":
         description="Enumerate M365 domains, retrieve tenant, check for MDI instance")
     parser.add_argument("-d", "--domain", required=True,
                         help="domain name, e.g. example.com")
+    parser.add_argument("-r", "--retries", type=int, default=10,
+                        help="max number of attempts to get a full response (default: 10)")
     get_domains(parser.parse_args())
