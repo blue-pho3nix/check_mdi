@@ -17,5 +17,5 @@ pip install -r requirements.txt
 ```
 If you don't get any domains after 10x retries, go for a higher `-r`... sometimes need `40–50` 
 ```
-python check_mdi.py -d <domain> -r 25
+python check_mdi.py -d <domain> -r 30
 ```
