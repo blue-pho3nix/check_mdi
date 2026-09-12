@@ -12,8 +12,8 @@ from urllib.error import HTTPError, URLError
 import dns.resolver
 
 
-def get_domains(args):
-    domain = args.domain
+def _fetch_federation_response(domain):
+    """Make a single GetFederationInformation request, return decoded XML or None."""
     body = f"""<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:a="http://www.w3.org/2005/08/addressing"
         xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -41,38 +41,57 @@ def get_domains(args):
         req = Request("https://autodiscover-s.outlook.com/autodiscover/autodiscover.svc",
                       headers=headers, data=body.encode())
         with urlopen(req) as resp:
-            status = resp.status
-            response = resp.read().decode()
-    except HTTPError as e:
-        print(f"[-] HTTP {e.code} {e.reason}")
-        print(e.read().decode(errors="replace"))
-        return
-    except URLError as e:
-        print(f"[-] Network/TLS error: {e.reason}")
-        return
+            return resp.read().decode()
+    except (HTTPError, URLError) as e:
+        print(f"[-] Request error: {e}")
+        return None
 
-    print(f"[i] HTTP {status}, {len(response)} bytes received")
-    tree = ET.fromstring(response)
 
-    for elem in tree.iter():
-        if elem.tag.endswith("}ErrorCode") and elem.text and elem.text != "NoError":
-            print(f"[-] Service returned ErrorCode: {elem.text}")
-
+def get_domains(args):
+    domain = args.domain
     ns = "{http://schemas.microsoft.com/exchange/2010/Autodiscover}Domain"
-    domains = [e.text for e in tree.iter() if e.tag == ns]
 
-    if not domains:
-        print("[-] No <Domain> elements in response. Raw response:\n")
-        print(response)
+    max_attempts = 10
+    best_domains = []
+
+    for attempt in range(1, max_attempts + 1):
+        response = _fetch_federation_response(domain)
+        if response is None:
+            continue
+
+        tree = ET.fromstring(response)
+        domains = [e.text for e in tree.iter() if e.tag == ns]
+
+        # Keep the fullest list we've seen so far
+        if len(domains) > len(best_domains):
+            best_domains = domains
+
+        # Stop as soon as we get a response containing the tenant domain
+        if any(d and d.lower().endswith(".onmicrosoft.com") for d in domains):
+            print(f"[i] Full response on attempt {attempt} ({len(domains)} domains)")
+            best_domains = domains
+            break
+        else:
+            print(f"[i] Attempt {attempt}: partial response ({len(domains)} domains), retrying...")
+
+    if not best_domains:
+        print(f"\n[-] No domains returned for {domain} after {max_attempts} attempts.")
+        print("[-] Domain may not be a Microsoft 365 tenant.")
         return
 
     print("\n[+] Domains found:")
-    print(*domains, sep="\n")
+    print(*best_domains, sep="\n")
 
-    tenant = next((d.split(".")[0] for d in domains if "onmicrosoft.com" in d), "")
+    tenant = next(
+        (d.split(".")[0] for d in best_domains
+         if d.lower().endswith(".onmicrosoft.com")
+         and not d.lower().endswith(".mail.onmicrosoft.com")),
+        "",
+    )
     if not tenant:
         print("\n[-] No onmicrosoft.com domain found; can't derive tenant.")
         return
+
     print(f"\n[+] Tenant found:\n{tenant}")
     check_mdi(tenant)
 
