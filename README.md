@@ -19,7 +19,7 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-If you don't get any domains after the default 10x retries, go for a higher `-r`... sometimes need `40–50` 
+If you don't get any domains after the default 10x retries, go for a higher retry... `-r` 
 ```
 python check_mdi.py -d <domain> -r 30
 ```
